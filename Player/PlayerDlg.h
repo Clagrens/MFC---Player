@@ -47,4 +47,6 @@ private:
 	HWND m_Video;
 	BOOL Pause;
 	
+public:
+	afx_msg void OnBnClickedButton1();
 };

@@ -10,7 +10,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
+int i=1;
 
 // CAboutDlg dialog used for App About
 
@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CPlayerDlg, CDialog)
 	ON_BN_CLICKED(IDC_PAUSE, &CPlayerDlg::OnBnClickedPause)
 	ON_BN_CLICKED(IDC_PLAY, &CPlayerDlg::OnBnClickedPlay)
 	ON_BN_CLICKED(IDC_STOP, &CPlayerDlg::OnBnClickedStop)
+	ON_BN_CLICKED(IDC_BUTTON1, &CPlayerDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -103,13 +104,14 @@ BOOL CPlayerDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
+
 	}
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
-
+	m_Video = NULL;
 	// TODO: Add extra initialization here
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -149,7 +151,7 @@ void CPlayerDlg::OnPaint()
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
 		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
+		//dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
 	{
@@ -170,7 +172,7 @@ HCURSOR CPlayerDlg::OnQueryDragIcon()
 void CPlayerDlg::OnBnClickedBrowse()
 {
 	// TODO: Add your control notification handler code here
-	m_Video = NULL;
+	
 	if(m_Video == NULL)
 	{
 		CFileDialog avi(TRUE,NULL,NULL,OFN_HIDEREADONLY,"MP3 Files (*.mp3)|*.mp3|AVI Files(*.avi)|*.avi|");
@@ -180,6 +182,18 @@ void CPlayerDlg::OnBnClickedBrowse()
 			UpdateData(FALSE);
 
 		}
+	}
+	else
+	{
+		MCIWndStop(m_Video);
+		MCIWndDestroy(m_Video);
+		m_Play.EnableWindow(TRUE);
+		CFileDialog avi(TRUE,NULL,NULL,OFN_HIDEREADONLY,"MP3 Files (*.mp3)|*.mp3|AVI Files(*.avi)|*.avi|");
+		if(avi.DoModal() == IDOK)
+		{
+			m_Path = avi.GetPathName();
+			UpdateData(FALSE);
+		}	
 	}
 
 }
@@ -244,4 +258,17 @@ void CPlayerDlg::OnBnClickedStop()
 	}
 	m_Play.EnableWindow(TRUE);
 
+}
+
+
+void CPlayerDlg::OnBnClickedButton1()
+{
+  MCI_OPEN_PARMS parm ;//打开参数
+  parm.lpstrDeviceType="CDAUDIO" ; //设备类型为光驱  指定设备类型为CD_ROM
+  mciSendCommand(NULL,MCI_OPEN,MCI_WAIT|MCI_OPEN_TYPE,(DWORD)&parm ) ; //初始化光驱   并且是参数中的 光驱类型有效
+  if(i%2==1)
+	mciSendCommand(MCI_ALL_DEVICE_ID,MCI_SET,MCI_SET_DOOR_OPEN,NULL)  ;//打开光驱    对光驱进行操作
+  else
+	mciSendCommand(MCI_ALL_DEVICE_ID,MCI_SET,MCI_SET_DOOR_CLOSED,NULL)  ;//打开光驱    对光驱进行操作
+  i++;
 }
